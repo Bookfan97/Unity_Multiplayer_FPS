@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -7,9 +8,14 @@ public class PlayerController : MonoBehaviour
 {
     [SerializeField] private bool shouldInverseMouse = false;
     [SerializeField] private Transform viewPoint;
-    [SerializeField] private float mouseSensitivty = 1.0f;
+    [SerializeField] private Transform groundCheckPoint;
     [SerializeField] private CharacterController _characterController;
+    [SerializeField] LayerMask groundLayers;
+    [SerializeField] private float mouseSensitivty = 1.0f;
+    [SerializeField] private float jumpForce = 12.0f;
+    [SerializeField] private float gravityMod = 2.0f;
     [SerializeField] private float moveSpeed = 5.0f, runSpeed = 8.0f;
+    private bool isGrounded;
     private float verticalRotationLimit, activeMoveSpeed;
     private Vector2 mouseInput;
     private Vector3 moveDirection, movement;
@@ -51,8 +57,22 @@ public class PlayerController : MonoBehaviour
         {
             activeMoveSpeed = moveSpeed;
         }
+
+        float yVelocity = movement.y;
         movement = ((transform.forward * moveDirection.z) + (transform.right * moveDirection.x)).normalized *activeMoveSpeed;
-       _characterController.Move(movement * Time.deltaTime);
+        if (!_characterController.isGrounded) movement.y = 0;
+        isGrounded = Physics.Raycast(groundCheckPoint.position, Vector3.down, .25f, groundLayers);
+        
+        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        {
+            movement.y = jumpForce;
+        }
+        movement.y += Physics.gravity.y * Time.deltaTime * gravityMod;
+        _characterController.Move(movement * Time.deltaTime);
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Cursor.lockState = CursorLockMode.None;
+        }
     }
 
     private void CameraMovement()
