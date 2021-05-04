@@ -5,11 +5,12 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    [SerializeField] private bool shouldInverseMouse = false;
     [SerializeField] private Transform viewPoint;
     [SerializeField] private float mouseSensitivty = 1.0f;
-    [SerializeField] private bool shouldInverseMouse = false;
-    [SerializeField] private float moveSpeed = 5.0f;
-    private float verticalRotationLimit;
+    [SerializeField] private CharacterController _characterController;
+    [SerializeField] private float moveSpeed = 5.0f, runSpeed = 8.0f;
+    private float verticalRotationLimit, activeMoveSpeed;
     private Vector2 mouseInput;
     private Vector3 moveDirection, movement;
     
@@ -29,8 +30,16 @@ public class PlayerController : MonoBehaviour
     private void PlayerMovement()
     {
         moveDirection = new Vector3(Input.GetAxisRaw("Horizontal"), 0f, Input.GetAxisRaw("Vertical"));
-        movement = ((transform.forward * moveDirection.z) + (transform.right * moveDirection.x)).normalized;
-        transform.position += movement * moveSpeed * Time.deltaTime;
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            activeMoveSpeed = runSpeed;
+        }
+        else
+        {
+            activeMoveSpeed = moveSpeed;
+        }
+        movement = ((transform.forward * moveDirection.z) + (transform.right * moveDirection.x)).normalized *activeMoveSpeed;
+       _characterController.Move(movement * Time.deltaTime);
     }
 
     private void CameraMovement()
