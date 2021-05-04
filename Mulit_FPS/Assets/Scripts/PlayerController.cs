@@ -13,11 +13,13 @@ public class PlayerController : MonoBehaviour
     private float verticalRotationLimit, activeMoveSpeed;
     private Vector2 mouseInput;
     private Vector3 moveDirection, movement;
+    private Camera _camera;
     
     // Start is called before the first frame update
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
+        _camera = Camera.main;
     }
 
     // Update is called once per frame
@@ -25,6 +27,17 @@ public class PlayerController : MonoBehaviour
     {
         CameraMovement();
         PlayerMovement();
+    }
+
+    private void LateUpdate()
+    {
+        UpdateCamera();
+    }
+    
+    private void UpdateCamera()
+    {
+        _camera.transform.position = viewPoint.position;
+        _camera.transform.rotation = viewPoint.rotation;
     }
 
     private void PlayerMovement()
