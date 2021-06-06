@@ -40,8 +40,7 @@ public class PlayerController : MonoBehaviour
         UpdateCamera();
     }
     
-
-
+    
     private void PlayerMovement()
     {
         moveDirection = new Vector3(Input.GetAxisRaw("Horizontal"), 0f, Input.GetAxisRaw("Vertical"));
@@ -65,6 +64,10 @@ public class PlayerController : MonoBehaviour
         }
         movement.y += Physics.gravity.y * Time.deltaTime * gravityMod;
         _characterController.Move(movement * Time.deltaTime);
+        if (Input.GetMouseButtonDown(0))
+        {
+            Shoot();
+        }
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             Cursor.lockState = CursorLockMode.None;
@@ -78,6 +81,16 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    public void Shoot()
+    {
+        Ray ray = _camera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
+        ray.origin = _camera.transform.position;
+        if (Physics.Raycast(ray, out RaycastHit hit))
+        {
+            Debug.Log("Hit: "+hit.collider.gameObject.name);
+        }
+    }
+    
     #region Camera
     private void UpdateCamera()
     {
