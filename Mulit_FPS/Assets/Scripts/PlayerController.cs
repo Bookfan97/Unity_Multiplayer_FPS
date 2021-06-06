@@ -40,11 +40,7 @@ public class PlayerController : MonoBehaviour
         UpdateCamera();
     }
     
-    private void UpdateCamera()
-    {
-        _camera.transform.position = viewPoint.position;
-        _camera.transform.rotation = viewPoint.rotation;
-    }
+
 
     private void PlayerMovement()
     {
@@ -59,11 +55,11 @@ public class PlayerController : MonoBehaviour
         }
 
         float yVelocity = movement.y;
-        movement = ((transform.forward * moveDirection.z) + (transform.right * moveDirection.x)).normalized *activeMoveSpeed;
-        if (!_characterController.isGrounded) movement.y = 0;
+        movement = ((transform.forward * moveDirection.z) + (transform.right * moveDirection.x)).normalized * activeMoveSpeed;
+        movement.y = yVelocity;
+        if (_characterController.isGrounded) movement.y = 0;
         isGrounded = Physics.Raycast(groundCheckPoint.position, Vector3.down, .25f, groundLayers);
-        
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        if (Input.GetButtonDown("Jump") && isGrounded)
         {
             movement.y = jumpForce;
         }
@@ -73,8 +69,22 @@ public class PlayerController : MonoBehaviour
         {
             Cursor.lockState = CursorLockMode.None;
         }
+        else if (Cursor.lockState == CursorLockMode.None)
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+            }
+        }
     }
 
+    #region Camera
+    private void UpdateCamera()
+    {
+        _camera.transform.position = viewPoint.position;
+        _camera.transform.rotation = viewPoint.rotation;
+    }
+    
     private void CameraMovement()
     {
         mouseInput = new Vector2(Input.GetAxisRaw("Mouse X"), Input.GetAxisRaw("Mouse Y")) * mouseSensitivty;
@@ -100,4 +110,5 @@ public class PlayerController : MonoBehaviour
                 viewPoint.rotation.eulerAngles.z);
         }
     }
+    #endregion
 }
