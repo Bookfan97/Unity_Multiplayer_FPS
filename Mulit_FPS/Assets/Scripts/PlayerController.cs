@@ -17,14 +17,13 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float jumpForce = 12.0f;
     [SerializeField] private float gravityMod = 2.0f;
     [SerializeField] private float moveSpeed = 5.0f, runSpeed = 8.0f;
-    //[SerializeField] private float timeBetweenShots = 0.1f;
+    public float muzzleDisplayTime;
     [SerializeField] float maxHeatValue = 10f, /*heatPerShot = 1f,*/ coolRate = 4f, overHeatCoolRate = 5f;
     private bool isGrounded, isOverheating;
-    private float verticalRotationLimit, activeMoveSpeed, shotCounter, heatCounter;
+    private float verticalRotationLimit, activeMoveSpeed, shotCounter, heatCounter, muzzleCounter;
     private Vector2 mouseInput;
     private Vector3 moveDirection, movement;
     private Camera _camera;
-
     private int selectedWeapon;
     // Start is called before the first frame update
     void Start()
@@ -75,6 +74,14 @@ public class PlayerController : MonoBehaviour
 
     private void InputController()
     {
+        if (weapons[selectedWeapon].muzzleFlash.activeInHierarchy)
+        {
+            muzzleCounter -= Time.deltaTime;
+            if (muzzleCounter <= 0)
+            {
+                weapons[selectedWeapon].muzzleFlash.SetActive(false);
+            }
+        }
         if (!isOverheating)
         {
             if (Input.GetMouseButtonDown(0))
@@ -155,6 +162,9 @@ public class PlayerController : MonoBehaviour
             heatCounter = maxHeatValue;
             isOverheating = true;
         }
+        
+        weapons[selectedWeapon].muzzleFlash.SetActive(true);
+        muzzleCounter = muzzleDisplayTime;
     }
 
     void SwitchWeapon()
@@ -164,6 +174,7 @@ public class PlayerController : MonoBehaviour
             weapon.gameObject.SetActive(false);
         }
         weapons[selectedWeapon].gameObject.SetActive(true);
+        weapons[selectedWeapon].muzzleFlash.SetActive(false);
     }
     
     #endregion
