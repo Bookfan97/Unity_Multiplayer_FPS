@@ -10,6 +10,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Transform viewPoint;
     [SerializeField] private Transform groundCheckPoint;
     [SerializeField] private CharacterController _characterController;
+    [SerializeField] private GameObject bulletImpact;
     [SerializeField] LayerMask groundLayers;
     [SerializeField] private float mouseSensitivty = 1.0f;
     [SerializeField] private float jumpForce = 12.0f;
@@ -88,6 +89,8 @@ public class PlayerController : MonoBehaviour
         if (Physics.Raycast(ray, out RaycastHit hit))
         {
             Debug.Log("Hit: "+hit.collider.gameObject.name);
+            GameObject bulletInstantiate = Instantiate(bulletImpact, hit.point + (hit.normal * 0.002f), Quaternion.LookRotation(hit.normal, Vector3.up));
+            Destroy(bulletInstantiate, 10f);
         }
     }
     
