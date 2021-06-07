@@ -16,8 +16,10 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float jumpForce = 12.0f;
     [SerializeField] private float gravityMod = 2.0f;
     [SerializeField] private float moveSpeed = 5.0f, runSpeed = 8.0f;
-    private bool isGrounded;
-    private float verticalRotationLimit, activeMoveSpeed;
+    [SerializeField] private float timeBetweenShots = 0.1f;
+    [SerializeField] float maxHeatValue = 10f, heatPerShot = 1f, coolRate = 4f, overHeatCoolRate = 5f;
+    private bool isGrounded, isOverheating;
+    private float verticalRotationLimit, activeMoveSpeed, shotCounter, heatCounter;
     private Vector2 mouseInput;
     private Vector3 moveDirection, movement;
     private Camera _camera;
@@ -27,6 +29,7 @@ public class PlayerController : MonoBehaviour
     {
         Cursor.lockState = CursorLockMode.Locked;
         _camera = Camera.main;
+        UIController.instance.weaponTempSlider.maxValue = maxHeatValue;
     }
 
     // Update is called once per frame
@@ -34,6 +37,7 @@ public class PlayerController : MonoBehaviour
     {
         CameraMovement();
         PlayerMovement();
+        InputController();
     }
 
     private void LateUpdate()
@@ -65,10 +69,40 @@ public class PlayerController : MonoBehaviour
         }
         movement.y += Physics.gravity.y * Time.deltaTime * gravityMod;
         _characterController.Move(movement * Time.deltaTime);
-        if (Input.GetMouseButtonDown(0))
+    }
+
+    private void InputController()
+    {
+        if (!isOverheating)
         {
-            Shoot();
+            if (Input.GetMouseButtonDown(0))
+            {
+                Shoot();
+            }
+
+            if (Input.GetMouseButton(0))
+            {
+                shotCounter -= Time.deltaTime;
+                if (shotCounter <= 0)
+                {
+                    Shoot();
+                }
+            }
+
+            heatCounter -= coolRate * Time.deltaTime;
         }
+        else
+        {
+            heatCounter -= overHeatCoolRate * Time.deltaTime;
+            if (heatCounter <= 0)
+            {
+                heatCounter = 0;
+                isOverheating = false;
+            }
+        }
+
+        UIController.instance.weaponTempSlider.value = heatCounter;
+            
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             Cursor.lockState = CursorLockMode.None;
@@ -91,6 +125,14 @@ public class PlayerController : MonoBehaviour
             Debug.Log("Hit: "+hit.collider.gameObject.name);
             GameObject bulletInstantiate = Instantiate(bulletImpact, hit.point + (hit.normal * 0.002f), Quaternion.LookRotation(hit.normal, Vector3.up));
             Destroy(bulletInstantiate, 10f);
+        }
+        shotCounter = timeBetweenShots;
+        heatCounter += heatPerShot;
+
+        if (heatCounter >= maxHeatValue)
+        {
+            heatCounter = maxHeatValue;
+            isOverheating = true;
         }
     }
     
