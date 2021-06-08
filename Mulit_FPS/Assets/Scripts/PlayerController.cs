@@ -128,6 +128,16 @@ public class PlayerController : MonoBehaviour
             }
             SwitchWeapon();
         }
+
+        for (int i = 0; i < weapons.Length; i++)
+        {
+            if (Input.GetKeyDown((i+1).ToString()))
+            {
+                selectedWeapon = i;
+                SwitchWeapon();
+            }
+        }
+        
         UIController.instance.weaponTempSlider.value = heatCounter;
             
         if (Input.GetKeyDown(KeyCode.Escape))
