@@ -37,3 +37,5 @@ sysinfo.txt
 *.apk
 *.unitypackage
 001 Basic Teleporting Quest - GameDev.tv Challenge Club/Assets/Real Stars Skybox/*
+Mulit_FPS/Assets/Photon/PhotonUnityNetworking/Resources/PhotonServerSettings.asset
+Mulit_FPS/Assets/Photon/PhotonUnityNetworking/Resources/PhotonServerSettings.asset.meta
