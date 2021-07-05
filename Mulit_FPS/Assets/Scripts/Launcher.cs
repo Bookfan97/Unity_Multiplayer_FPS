@@ -16,6 +16,8 @@ public class Launcher : MonoBehaviourPunCallbacks
     public TMP_InputField roomNameInput;
     public GameObject RoomScreen;
     public TMP_Text roomNameText;
+    public GameObject errorScreen;
+    public TMP_Text errorText;
     
     private void Awake()
     {
@@ -36,6 +38,7 @@ public class Launcher : MonoBehaviourPunCallbacks
         loadingScreen.SetActive(false);
         createRoomScreen.SetActive(false);
         RoomScreen.SetActive(false);
+        errorScreen.SetActive(false);
         menuButtons.SetActive(false);
     }
 
@@ -75,5 +78,18 @@ public class Launcher : MonoBehaviourPunCallbacks
         CloseMenus();
         RoomScreen.SetActive(true);
         roomNameText.text = PhotonNetwork.CurrentRoom.Name;
+    }
+
+    public override void OnCreateRoomFailed(short returnCode, string message)
+    {
+        errorText.text = "Failed to create room: " + message;
+        CloseMenus();
+        errorScreen.SetActive(true);
+    }
+
+    public void CloseErrorScreen()
+    {
+        CloseMenus();
+        menuButtons.SetActive(true);
     }
 }
