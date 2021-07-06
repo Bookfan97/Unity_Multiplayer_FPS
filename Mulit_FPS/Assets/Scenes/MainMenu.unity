@@ -957,6 +957,11 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 7566913318081933182, guid: 1289cbea5e8faa44a9ab61cffa6fc8cb, type: 3}
   m_PrefabInstance: {fileID: 867447424}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &932739204 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7566913318081933183, guid: 1289cbea5e8faa44a9ab61cffa6fc8cb, type: 3}
+  m_PrefabInstance: {fileID: 1455153534}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1006931621
 GameObject:
   m_ObjectHideFlags: 0
@@ -1527,6 +1532,34 @@ PrefabInstance:
     - target: {fileID: 7566913316822407747, guid: 1289cbea5e8faa44a9ab61cffa6fc8cb, type: 3}
       propertyPath: m_text
       value: Start Game
+      objectReference: {fileID: 0}
+    - target: {fileID: 7566913318081933181, guid: 1289cbea5e8faa44a9ab61cffa6fc8cb, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7566913318081933181, guid: 1289cbea5e8faa44a9ab61cffa6fc8cb, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7566913318081933181, guid: 1289cbea5e8faa44a9ab61cffa6fc8cb, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7566913318081933181, guid: 1289cbea5e8faa44a9ab61cffa6fc8cb, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 7065261392627952260}
+    - target: {fileID: 7566913318081933181, guid: 1289cbea5e8faa44a9ab61cffa6fc8cb, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: Launcher, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 7566913318081933181, guid: 1289cbea5e8faa44a9ab61cffa6fc8cb, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: StartGame
+      objectReference: {fileID: 0}
+    - target: {fileID: 7566913318081933181, guid: 1289cbea5e8faa44a9ab61cffa6fc8cb, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 7566913318081933182, guid: 1289cbea5e8faa44a9ab61cffa6fc8cb, type: 3}
       propertyPath: m_LocalPosition.x
@@ -3285,6 +3318,8 @@ MonoBehaviour:
   RoomButton: {fileID: 1926073603}
   nameInputScreen: {fileID: 7065261392341015997}
   nameInput: {fileID: 7065261393061492534}
+  levelToPlay: Map1
+  startButton: {fileID: 932739204}
 --- !u!224 &7065261392627952261
 RectTransform:
   m_ObjectHideFlags: 0
