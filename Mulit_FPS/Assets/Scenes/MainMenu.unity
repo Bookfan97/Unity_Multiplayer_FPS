@@ -1329,6 +1329,34 @@ PrefabInstance:
       propertyPath: m_text
       value: Select Name
       objectReference: {fileID: 0}
+    - target: {fileID: 7566913318081933181, guid: 1289cbea5e8faa44a9ab61cffa6fc8cb, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7566913318081933181, guid: 1289cbea5e8faa44a9ab61cffa6fc8cb, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7566913318081933181, guid: 1289cbea5e8faa44a9ab61cffa6fc8cb, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7566913318081933181, guid: 1289cbea5e8faa44a9ab61cffa6fc8cb, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 7065261392627952260}
+    - target: {fileID: 7566913318081933181, guid: 1289cbea5e8faa44a9ab61cffa6fc8cb, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: Launcher, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 7566913318081933181, guid: 1289cbea5e8faa44a9ab61cffa6fc8cb, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: SetNickname
+      objectReference: {fileID: 0}
+    - target: {fileID: 7566913318081933181, guid: 1289cbea5e8faa44a9ab61cffa6fc8cb, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
     - target: {fileID: 7566913318081933182, guid: 1289cbea5e8faa44a9ab61cffa6fc8cb, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -3255,6 +3283,8 @@ MonoBehaviour:
   errorText: {fileID: 7065261393777043092}
   roomBrowserScreen: {fileID: 7065261393205270414}
   RoomButton: {fileID: 1926073603}
+  nameInputScreen: {fileID: 7065261392341015997}
+  nameInput: {fileID: 7065261393061492534}
 --- !u!224 &7065261392627952261
 RectTransform:
   m_ObjectHideFlags: 0
