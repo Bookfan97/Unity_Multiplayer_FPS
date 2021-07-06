@@ -107,6 +107,11 @@ public class Launcher : MonoBehaviourPunCallbacks
         RoomScreen.SetActive(true);
         roomNameText.text = PhotonNetwork.CurrentRoom.Name;
         ListAllPlayers();
+        SetStartButton();
+    }
+
+    private void SetStartButton()
+    {
         if (PhotonNetwork.IsMasterClient)
         {
             startButton.SetActive(true);
@@ -227,6 +232,11 @@ public class Launcher : MonoBehaviourPunCallbacks
             menuButtons.SetActive(true);
             hasSetNickName = true;
         }
+    }
+
+    public override void OnMasterClientSwitched(Player newMasterClient)
+    {
+        SetStartButton();
     }
 
     public void StartGame()
