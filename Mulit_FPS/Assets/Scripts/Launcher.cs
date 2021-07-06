@@ -143,4 +143,12 @@ public class Launcher : MonoBehaviourPunCallbacks
             }
         }
     }
+
+    public void JoinRoom(RoomInfo info)
+    {
+        PhotonNetwork.JoinRoom(info.Name);
+        CloseMenus();
+        loadingText.text = $"Joining Room: {info.Name}...";
+        loadingScreen.SetActive(true);
+    }
 }
