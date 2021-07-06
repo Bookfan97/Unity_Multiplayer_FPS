@@ -28,6 +28,7 @@ public class Launcher : MonoBehaviourPunCallbacks
     private bool hasSetNickName;
     public string levelToPlay;
     public GameObject startButton;
+    public GameObject roomTestButton;
     
     private void Awake()
     {
@@ -42,6 +43,9 @@ public class Launcher : MonoBehaviourPunCallbacks
         loadingScreen.SetActive(true);
         loadingText.text = "Connecting to Network...";
         PhotonNetwork.ConnectUsingSettings();
+#if UNITY_EDITOR
+        roomTestButton.SetActive(true);
+#endif
     }
 
     void CloseMenus()
@@ -247,5 +251,15 @@ public class Launcher : MonoBehaviourPunCallbacks
     public void QuitGame()
     {
         Application.Quit();
+    }
+
+    public void QuickJoin()
+    {
+        PhotonNetwork.CreateRoom("Test");
+        CloseMenus();
+        loadingText.text = "Creating test room";
+        loadingScreen.SetActive(true);
+        RoomOptions options = new RoomOptions();
+        options.MaxPlayers = 8;
     }
 }
