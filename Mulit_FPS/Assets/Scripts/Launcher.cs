@@ -18,7 +18,9 @@ public class Launcher : MonoBehaviourPunCallbacks
     public TMP_Text roomNameText;
     public GameObject errorScreen;
     public TMP_Text errorText;
-    
+    public GameObject roomBrowserScreen;
+    public RoomButton RoomButton;
+    private List<RoomButton> allRoomButtons;
     private void Awake()
     {
         instance = this;
@@ -27,6 +29,7 @@ public class Launcher : MonoBehaviourPunCallbacks
     // Start is called before the first frame update
     void Start()
     {
+        allRoomButtons = new List<RoomButton>();
         CloseMenus();
         loadingScreen.SetActive(true);
         loadingText.text = "Connecting to Network...";
@@ -39,6 +42,7 @@ public class Launcher : MonoBehaviourPunCallbacks
         createRoomScreen.SetActive(false);
         RoomScreen.SetActive(false);
         errorScreen.SetActive(false);
+        roomBrowserScreen.SetActive(false);
         menuButtons.SetActive(false);
     }
 
@@ -105,5 +109,38 @@ public class Launcher : MonoBehaviourPunCallbacks
     {
         CloseMenus();
         menuButtons.SetActive(true);
+    }
+
+    public void OpenRoomBrowser()
+    {
+        CloseMenus();
+        roomBrowserScreen.SetActive(true);
+    }
+    
+    public void CloseRoomBrowser()
+    {
+        CloseMenus();
+        menuButtons.SetActive(true);
+    }
+
+    public override void OnRoomListUpdate(List<RoomInfo> roomList)
+    {
+        foreach (RoomButton roomButton in allRoomButtons)
+        {
+            Destroy(roomButton.gameObject);
+        }
+        allRoomButtons.Clear();
+        RoomButton.gameObject.SetActive(false);
+        for (int i = 0; i < roomList.Count; i++)
+        {
+            if (roomList[i].PlayerCount != roomList[i].MaxPlayers && 
+                !roomList[i].RemovedFromList)
+            {
+                RoomButton newRoomButton = Instantiate(RoomButton, RoomButton.transform.parent);
+                newRoomButton.SetButtonInfo(roomList[i]);
+                newRoomButton.gameObject.SetActive(true);
+                allRoomButtons.Add(newRoomButton);
+            }
+        }
     }
 }
