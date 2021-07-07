@@ -2,16 +2,17 @@
 using System.Collections;
 using System.Collections.Generic;
 using JetBrains.Annotations;
+using Photon.Pun;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviourPunCallbacks
 {
     public Weapon[] weapons;
     [SerializeField] private bool shouldInverseMouse = false;
     [SerializeField] private Transform viewPoint;
     [SerializeField] private Transform groundCheckPoint;
     [SerializeField] private CharacterController _characterController;
-    [SerializeField] private GameObject bulletImpact;
+    [SerializeField] private GameObject bulletImpact, playerHitImpact;
     [SerializeField] LayerMask groundLayers;
     [SerializeField] private float mouseSensitivty = 1.0f;
     [SerializeField] private float jumpForce = 12.0f;
@@ -36,14 +37,20 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        CameraMovement();
-        PlayerMovement();
-        InputController();
+        if (photonView.IsMine)
+        {
+            CameraMovement();
+            PlayerMovement();
+            InputController();   
+        }
     }
 
     private void LateUpdate()
     {
-        UpdateCamera();
+        if (photonView.IsMine)
+        {
+            UpdateCamera();
+        }
     }
     
     
@@ -153,16 +160,23 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    #region Weapom
+    #region Weapon
     public void Shoot()
     {
         Ray ray = _camera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
         ray.origin = _camera.transform.position;
         if (Physics.Raycast(ray, out RaycastHit hit))
         {
-            Debug.Log("Hit: "+hit.collider.gameObject.name);
-            GameObject bulletInstantiate = Instantiate(bulletImpact, hit.point + (hit.normal * 0.002f), Quaternion.LookRotation(hit.normal, Vector3.up));
-            Destroy(bulletInstantiate, 10f);
+            if (hit.collider.gameObject.tag == "Player")
+            {
+                PhotonNetwork.Instantiate(playerHitImpact.name, hit.point, Quaternion.identity);
+                hit.collider.gameObject.GetPhotonView().RPC("DealDamage", RpcTarget.All, photonView.Owner.NickName);
+            }
+            else
+            {
+                GameObject bulletInstantiate = Instantiate(bulletImpact, hit.point + (hit.normal * 0.002f), Quaternion.LookRotation(hit.normal, Vector3.up));
+                Destroy(bulletInstantiate, 10f);
+            }
         }
         shotCounter = weapons[selectedWeapon].timeBetweenShots;
         heatCounter += weapons[selectedWeapon].heatPerShot;
@@ -186,7 +200,19 @@ public class PlayerController : MonoBehaviour
         weapons[selectedWeapon].gameObject.SetActive(true);
         weapons[selectedWeapon].muzzleFlash.SetActive(false);
     }
-    
+
+    [PunRPC]
+    public void DealDamage(string damager)
+    {
+        TakeDamage(damager);
+    }
+
+    public void TakeDamage(string damager)
+    {
+        Debug.Log($"{photonView.Owner.NickName} hit by {damager}");
+        gameObject.SetActive(false);
+    }
+
     #endregion
 
     #region Camera
