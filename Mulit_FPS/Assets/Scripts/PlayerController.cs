@@ -170,6 +170,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
             if (hit.collider.gameObject.tag == "Player")
             {
                 PhotonNetwork.Instantiate(playerHitImpact.name, hit.point, Quaternion.identity);
+                hit.collider.gameObject.GetPhotonView().RPC("DealDamage", RpcTarget.All, photonView.Owner.NickName);
             }
             else
             {
@@ -198,6 +199,12 @@ public class PlayerController : MonoBehaviourPunCallbacks
         }
         weapons[selectedWeapon].gameObject.SetActive(true);
         weapons[selectedWeapon].muzzleFlash.SetActive(false);
+    }
+
+    [PunRPC]
+    public void DealDamage(string damager)
+    {
+        Debug.Log($"I've been hit by {damager}");
     }
     
     #endregion
