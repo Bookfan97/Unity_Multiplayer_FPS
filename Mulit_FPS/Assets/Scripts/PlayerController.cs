@@ -2,9 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using JetBrains.Annotations;
+using Photon.Pun;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviourPunCallbacks
 {
     public Weapon[] weapons;
     [SerializeField] private bool shouldInverseMouse = false;
@@ -36,14 +37,20 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        CameraMovement();
-        PlayerMovement();
-        InputController();
+        if (photonView.IsMine)
+        {
+            CameraMovement();
+            PlayerMovement();
+            InputController();   
+        }
     }
 
     private void LateUpdate()
     {
-        UpdateCamera();
+        if (photonView.IsMine)
+        {
+            UpdateCamera();
+        }
     }
     
     
