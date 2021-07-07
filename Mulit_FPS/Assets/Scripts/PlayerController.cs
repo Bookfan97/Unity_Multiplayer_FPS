@@ -12,7 +12,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
     [SerializeField] private Transform viewPoint;
     [SerializeField] private Transform groundCheckPoint;
     [SerializeField] private CharacterController _characterController;
-    [SerializeField] private GameObject bulletImpact;
+    [SerializeField] private GameObject bulletImpact, playerHitImpact;
     [SerializeField] LayerMask groundLayers;
     [SerializeField] private float mouseSensitivty = 1.0f;
     [SerializeField] private float jumpForce = 12.0f;
@@ -160,16 +160,22 @@ public class PlayerController : MonoBehaviourPunCallbacks
         }
     }
 
-    #region Weapom
+    #region Weapon
     public void Shoot()
     {
         Ray ray = _camera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
         ray.origin = _camera.transform.position;
         if (Physics.Raycast(ray, out RaycastHit hit))
         {
-            Debug.Log("Hit: "+hit.collider.gameObject.name);
-            GameObject bulletInstantiate = Instantiate(bulletImpact, hit.point + (hit.normal * 0.002f), Quaternion.LookRotation(hit.normal, Vector3.up));
-            Destroy(bulletInstantiate, 10f);
+            if (hit.collider.gameObject.tag == "Player")
+            {
+                PhotonNetwork.Instantiate(playerHitImpact.name, hit.point, Quaternion.identity);
+            }
+            else
+            {
+                GameObject bulletInstantiate = Instantiate(bulletImpact, hit.point + (hit.normal * 0.002f), Quaternion.LookRotation(hit.normal, Vector3.up));
+                Destroy(bulletInstantiate, 10f);
+            }
         }
         shotCounter = weapons[selectedWeapon].timeBetweenShots;
         heatCounter += weapons[selectedWeapon].heatPerShot;

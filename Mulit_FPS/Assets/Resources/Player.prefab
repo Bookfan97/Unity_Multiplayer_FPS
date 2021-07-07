@@ -67,7 +67,7 @@ GameObject:
   - component: {fileID: 577727089361347016}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -172,6 +172,7 @@ MonoBehaviour:
   groundCheckPoint: {fileID: 7486165358067574546}
   _characterController: {fileID: 7486165357318608342}
   bulletImpact: {fileID: 5764737028328337070, guid: 8224ea23c25992e41b2033adb666a453, type: 3}
+  playerHitImpact: {fileID: 0}
   groundLayers:
     serializedVersion: 2
     m_Bits: 4294967295
