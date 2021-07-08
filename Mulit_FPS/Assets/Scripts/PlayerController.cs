@@ -209,8 +209,10 @@ public class PlayerController : MonoBehaviourPunCallbacks
 
     public void TakeDamage(string damager)
     {
-        Debug.Log($"{photonView.Owner.NickName} hit by {damager}");
-        gameObject.SetActive(false);
+        if (photonView.IsMine)
+        {
+            PlayerSpawner.instance.Die();
+        }
     }
 
     #endregion
