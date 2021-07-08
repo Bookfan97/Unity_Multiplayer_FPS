@@ -35,6 +35,9 @@ public class PlayerController : MonoBehaviourPunCallbacks
         Cursor.lockState = CursorLockMode.Locked;
         _camera = Camera.main;
         UIController.instance.weaponTempSlider.maxValue = maxHeatValue;
+        UIController.instance.playerHealthSlider.maxValue = maxHealth;
+        UIController.instance.playerHealthSlider.value = currentHealth;
+        
         SwitchWeapon();
     }
 
@@ -216,6 +219,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
         if (photonView.IsMine)
         {
             currentHealth -= damageAmount;
+            UIController.instance.playerHealthSlider.value = currentHealth;
             if (currentHealth <= 0)
             {
                 currentHealth = 0;
