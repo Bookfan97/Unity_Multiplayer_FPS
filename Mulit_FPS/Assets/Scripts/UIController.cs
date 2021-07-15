@@ -8,7 +8,7 @@ public class UIController : MonoBehaviour
 {
     public static UIController instance;
     public GameObject deathScreen;
-    public TMP_Text deathText;
+    public TMP_Text deathText, deathsText, killsText;
     public Slider weaponTempSlider, playerHealthSlider;
     
     // Start is called before the first frame update
