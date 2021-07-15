@@ -29,16 +29,21 @@ public class PlayerController : MonoBehaviourPunCallbacks
     private int selectedWeapon;
     [SerializeField] public int maxHealth = 100;
     private int currentHealth;
+    public GameObject playerModel;
     // Start is called before the first frame update
     void Start()
     {
         currentHealth = maxHealth;
         Cursor.lockState = CursorLockMode.Locked;
         _camera = Camera.main;
-        UIController.instance.weaponTempSlider.maxValue = maxHeatValue;
-        UIController.instance.playerHealthSlider.maxValue = maxHealth;
-        UIController.instance.playerHealthSlider.value = currentHealth;
         
+        if (photonView.IsMine)
+        {
+            UIController.instance.weaponTempSlider.maxValue = maxHeatValue;
+            UIController.instance.playerHealthSlider.maxValue = maxHealth;
+            UIController.instance.playerHealthSlider.value = currentHealth;
+            playerModel.SetActive(false);
+        }
         SwitchWeapon();
     }
 
