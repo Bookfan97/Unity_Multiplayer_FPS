@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using JetBrains.Annotations;
 using Photon.Pun;
+using TMPro;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviourPunCallbacks
@@ -30,6 +31,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
     [SerializeField] public int maxHealth = 100;
     private int currentHealth;
     public GameObject playerModel;
+    public Transform modelGunPoint, gunHolder;
     // Start is called before the first frame update
     void Start()
     {
@@ -44,7 +46,13 @@ public class PlayerController : MonoBehaviourPunCallbacks
             UIController.instance.playerHealthSlider.value = currentHealth;
             playerModel.SetActive(false);
         }
-        SwitchWeapon();
+        else
+        {
+            gunHolder.parent = modelGunPoint;
+            gunHolder.localPosition = Vector3.zero;
+            gunHolder.localRotation = Quaternion.identity;
+        }
+        photonView.RPC("SetGun", RpcTarget.All, selectedWeapon);
     }
 
     // Update is called once per frame
@@ -144,7 +152,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
             {
                 selectedWeapon = 0;
             }
-            SwitchWeapon();
+            photonView.RPC("SetGun", RpcTarget.All, selectedWeapon);
         }
         else if (Input.GetAxisRaw("Mouse ScrollWheel") < 0f)
         {
@@ -153,7 +161,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
             {
                 selectedWeapon = weapons.Length - 1;
             }
-            SwitchWeapon();
+            photonView.RPC("SetGun", RpcTarget.All, selectedWeapon);
         }
 
         for (int i = 0; i < weapons.Length; i++)
@@ -161,7 +169,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
             if (Input.GetKeyDown((i+1).ToString()))
             {
                 selectedWeapon = i;
-                SwitchWeapon();
+                photonView.RPC("SetGun", RpcTarget.All, selectedWeapon);
             }
         }
         
@@ -221,6 +229,16 @@ public class PlayerController : MonoBehaviourPunCallbacks
         weapons[selectedWeapon].muzzleFlash.SetActive(false);
     }
 
+    [PunRPC]
+    public void SetGun(int gunToSetTo)
+    {
+        if (gunToSetTo < weapons.Length)
+        {
+            selectedWeapon = gunToSetTo;
+            SwitchWeapon();
+        }
+    }
+    
     [PunRPC]
     public void DealDamage(string damager, int damageAmount)
     {
