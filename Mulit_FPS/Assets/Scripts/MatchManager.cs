@@ -9,16 +9,17 @@ using UnityEngine.SceneManagement;
 
 public class MatchManager : MonoBehaviour, IOnEventCallback
 {
-    public enum EventCodes: byte
+    public enum EventCodes : byte
     {
         NewPlayer,
         ListPlayers,
         UpdateStat
     }
+
     public static MatchManager instance;
     public List<PlayerInfo> allPlayers = new List<PlayerInfo>();
     public int index;
-    
+
     private void Awake()
     {
         instance = this;
@@ -40,7 +41,7 @@ public class MatchManager : MonoBehaviour, IOnEventCallback
     // Update is called once per frame
     void Update()
     {
-       
+
     }
 
     public void OnEvent(EventData photonEvent)
@@ -95,7 +96,7 @@ public class MatchManager : MonoBehaviour, IOnEventCallback
             new SendOptions {Reliability = true}
         );
     }
-    
+
     public void NewPlayerReceive(object[] data)
     {
         PlayerInfo playerInfo = new PlayerInfo((string) data[0], (int) data[1], (int) data[2], (int) data[3]);
@@ -115,7 +116,7 @@ public class MatchManager : MonoBehaviour, IOnEventCallback
 
             package[i] = piece;
         }
-        
+
         PhotonNetwork.RaiseEvent(
             (byte) EventCodes.ListPlayers,
             package,
@@ -123,7 +124,7 @@ public class MatchManager : MonoBehaviour, IOnEventCallback
             new SendOptions {Reliability = true}
         );
     }
-    
+
     public void ListPlayerReceive(object[] objects)
     {
         allPlayers.Clear();
@@ -142,7 +143,7 @@ public class MatchManager : MonoBehaviour, IOnEventCallback
     public void UpdateStatsSend(int actorSend, int statToUpdate, int amountToChange)
     {
         object[] package = new object[] {actorSend, statToUpdate, amountToChange};
-        
+
         PhotonNetwork.RaiseEvent(
             (byte) EventCodes.UpdateStat,
             package,
@@ -150,7 +151,7 @@ public class MatchManager : MonoBehaviour, IOnEventCallback
             new SendOptions {Reliability = true}
         );
     }
-    
+
     public void UpdateStatsReceive(object[] objects)
     {
         int actor = (int) objects[0];
@@ -173,8 +174,27 @@ public class MatchManager : MonoBehaviour, IOnEventCallback
                         break;
                     }
                 }
+
+                if (i == index)
+                {
+                    UpdateStatsDisplay();
+                }
                 break;
             }
+        }
+    }
+    
+    public void UpdateStatsDisplay()
+    {
+        if (allPlayers.Count > index)
+        {
+            UIController.instance.killsText.text = $"Kills: {allPlayers[index].kills}";
+            UIController.instance.deathsText.text = $"Deaths: {allPlayers[index].deaths}";
+        }
+        else
+        {
+            UIController.instance.killsText.text = "Kills: 0";
+            UIController.instance.deathsText.text = "Deaths: 0";
         }
     }
 }
