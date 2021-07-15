@@ -7,6 +7,7 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviourPunCallbacks
 {
+    public Animator animator;
     public Weapon[] weapons;
     [SerializeField] private bool shouldInverseMouse = false;
     [SerializeField] private Transform viewPoint;
@@ -48,8 +49,15 @@ public class PlayerController : MonoBehaviourPunCallbacks
         {
             CameraMovement();
             PlayerMovement();
-            InputController();   
+            InputController();
+            SetAnimValues();
         }
+    }
+
+    private void SetAnimValues()
+    {
+        animator.SetBool("grounded", isGrounded);
+        animator.SetFloat("speed", moveDirection.magnitude);
     }
 
     private void LateUpdate()
