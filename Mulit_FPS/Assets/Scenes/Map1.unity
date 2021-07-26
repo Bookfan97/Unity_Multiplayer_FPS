@@ -1318,6 +1318,8 @@ MonoBehaviour:
   killsText: {fileID: 485582752}
   weaponTempSlider: {fileID: 502130271}
   playerHealthSlider: {fileID: 1407279241}
+  leaderboard: {fileID: 1362513107}
+  leaderboardPlayerDisplay: {fileID: 1299494894}
 --- !u!1 &502130269
 GameObject:
   m_ObjectHideFlags: 0
