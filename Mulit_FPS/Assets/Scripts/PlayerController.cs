@@ -265,8 +265,16 @@ public class PlayerController : MonoBehaviourPunCallbacks
     #region Camera
     private void UpdateCamera()
     {
-        _camera.transform.position = viewPoint.position;
-        _camera.transform.rotation = viewPoint.rotation;
+        if (MatchManager.instance.state == MatchManager.GameState.Playing)
+        {
+            _camera.transform.position = viewPoint.position;
+            _camera.transform.rotation = viewPoint.rotation;
+        }
+        else
+        {
+            _camera.transform.position = MatchManager.instance.mapCameraPoint.position;
+            _camera.transform.rotation = MatchManager.instance.mapCameraPoint.rotation;
+        }
     }
     
     private void CameraMovement()

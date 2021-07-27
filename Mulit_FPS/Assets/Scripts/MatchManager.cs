@@ -20,6 +20,19 @@ public class MatchManager : MonoBehaviour, IOnEventCallback
     public List<PlayerInfo> allPlayers = new List<PlayerInfo>();
     public int index;
     private List<LeaderboardPlayer> leaderboardPlayers = new List<LeaderboardPlayer>();
+
+    public enum GameState
+    {
+        Waiting,
+        Playing,
+        Ending
+    }
+
+    public int killsToWin = 1;
+    public Transform mapCameraPoint;
+    public GameState state = GameState.Waiting;
+    public float waitAfterEnding = 5f;
+    
     private void Awake()
     {
         instance = this;
@@ -35,13 +48,14 @@ public class MatchManager : MonoBehaviour, IOnEventCallback
         else
         {
             NewPlayerSend(PhotonNetwork.NickName);
+            state = GameState.Playing;
         }
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Tab))
+        if (Input.GetKeyDown(KeyCode.Tab) && state != GameState.Waiting)
         {
             if (UIController.instance.leaderboard.activeInHierarchy)
             {
@@ -115,7 +129,8 @@ public class MatchManager : MonoBehaviour, IOnEventCallback
 
     public void ListPlayerSend()
     {
-        object[] package = new object[allPlayers.Count];
+        object[] package = new object[allPlayers.Count + 1];
+        package[0] = state;
         for (int i = 0; i < allPlayers.Count; i++)
         {
             object[] piece = new object[4];
@@ -124,7 +139,7 @@ public class MatchManager : MonoBehaviour, IOnEventCallback
             piece[2] = allPlayers[i].kills;
             piece[3] = allPlayers[i].deaths;
 
-            package[i] = piece;
+            package[i + 1] = piece;
         }
 
         PhotonNetwork.RaiseEvent(
@@ -138,16 +153,18 @@ public class MatchManager : MonoBehaviour, IOnEventCallback
     public void ListPlayerReceive(object[] objects)
     {
         allPlayers.Clear();
-        for (int i = 0; i < objects.Length; i++)
+        state = (GameState) objects[0]; 
+        for (int i = 1; i < objects.Length; i++)
         {
             object[] piece = (object[]) objects[i];
             PlayerInfo playerInfo = new PlayerInfo((string) piece[0], (int) piece[1], (int) piece[2], (int) piece[3]);
             allPlayers.Add(playerInfo);
             if (PhotonNetwork.LocalPlayer.ActorNumber == playerInfo.actor)
             {
-                index = i;
+                index = i-1;
             }
         }
+        StateCheck();
     }
 
     public void UpdateStatsSend(int actorSend, int statToUpdate, int amountToChange)
@@ -197,6 +214,7 @@ public class MatchManager : MonoBehaviour, IOnEventCallback
                 break;
             }
         }
+        ScoreCheck();
     }
     
     public void UpdateStatsDisplay()
@@ -253,6 +271,63 @@ public class MatchManager : MonoBehaviour, IOnEventCallback
             sorted.Add(selectedPlayer);
         }
         return sorted;
+    }
+
+    public void OnLeftRoom()
+    {
+        //base.OnLeftRoom();
+        SceneManager.LoadScene(0);
+    }
+
+    void ScoreCheck()
+    {
+        bool winnerFound = false;
+        foreach (PlayerInfo player in allPlayers)
+        {
+            if (player.kills >= killsToWin && killsToWin > 0)
+            {
+                winnerFound = true;
+                break;
+            }
+        }
+
+        if (winnerFound)
+        {
+            if (PhotonNetwork.IsMasterClient && state != GameState.Ending)
+            {
+                state = GameState.Ending;
+                ListPlayerSend();
+            }
+        }
+    }
+
+    void StateCheck()
+    {
+        if (state == GameState.Ending)
+        {
+            EndGame();
+        }
+    }
+
+    void EndGame()
+    {
+        state = GameState.Ending;
+        if (PhotonNetwork.IsMasterClient)
+        {
+            PhotonNetwork.DestroyAll();
+        }
+        UIController.instance.endScreen.SetActive(true);
+        ShowLeaderboard();
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+        StartCoroutine(EndCo());
+    }
+
+    private IEnumerator EndCo()
+    {
+        yield return new WaitForSeconds(waitAfterEnding);
+        PhotonNetwork.AutomaticallySyncScene = false;
+        PhotonNetwork.LeaveRoom();
     }
 }
 
