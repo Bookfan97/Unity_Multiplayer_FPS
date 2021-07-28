@@ -320,6 +320,8 @@ public class MatchManager : MonoBehaviour, IOnEventCallback
         ShowLeaderboard();
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
+        Camera.main.transform.position = mapCameraPoint.position;
+        Camera.main.transform.rotation = mapCameraPoint.rotation;
         StartCoroutine(EndCo());
     }
 
