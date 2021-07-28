@@ -6,6 +6,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Random = UnityEngine.Random;
 
 public class MatchManager : MonoBehaviour, IOnEventCallback
 {
@@ -13,13 +14,32 @@ public class MatchManager : MonoBehaviour, IOnEventCallback
     {
         NewPlayer,
         ListPlayers,
-        UpdateStat
+        UpdateStat,
+        NextMatch,
+        TimerSync
     }
 
     public static MatchManager instance;
     public List<PlayerInfo> allPlayers = new List<PlayerInfo>();
     public int index;
     private List<LeaderboardPlayer> leaderboardPlayers = new List<LeaderboardPlayer>();
+    public float matchLength = 180.0f;
+    public float currentMatchTime;
+    private float sendTimer;
+    
+    public enum GameState
+    {
+        Waiting,
+        Playing,
+        Ending
+    }
+
+    public int killsToWin = 1;
+    public Transform mapCameraPoint;
+    public GameState state = GameState.Waiting;
+    public float waitAfterEnding = 5f;
+    public bool perpetualMatch;
+    
     private void Awake()
     {
         instance = this;
@@ -35,13 +55,19 @@ public class MatchManager : MonoBehaviour, IOnEventCallback
         else
         {
             NewPlayerSend(PhotonNetwork.NickName);
+            state = GameState.Playing;
+            SetupTimer();
+            if (!PhotonNetwork.IsMasterClient)
+            {
+                UIController.instance.timerText.gameObject.SetActive(false);
+            }
         }
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Tab))
+        if (Input.GetKeyDown(KeyCode.Tab) && state != GameState.Waiting)
         {
             if (UIController.instance.leaderboard.activeInHierarchy)
             {
@@ -50,6 +76,28 @@ public class MatchManager : MonoBehaviour, IOnEventCallback
             else
             {
                 ShowLeaderboard();
+            }
+        }
+
+        if (PhotonNetwork.IsMasterClient)
+        {
+            if (currentMatchTime > 0 && state == GameState.Playing)
+            {
+                currentMatchTime -= Time.deltaTime;
+                if (currentMatchTime <= 0)
+                {
+                    currentMatchTime = 0;
+                    state = GameState.Ending;
+                        ListPlayerSend();
+                        StateCheck();
+                }
+                UpdateTimerDisplay();
+                sendTimer -= Time.deltaTime;
+                if (sendTimer <= 0)
+                {
+                    sendTimer += 1;
+                    TimerSend();
+                }
             }
         }
     }
@@ -75,6 +123,16 @@ public class MatchManager : MonoBehaviour, IOnEventCallback
                 case EventCodes.UpdateStat:
                 {
                     UpdateStatsReceive(data);
+                    break;
+                }
+                case EventCodes.NextMatch:
+                {
+                    NextMatchReceive();
+                    break;
+                }
+                case EventCodes.TimerSync:
+                {
+                    TimerReceive(data);
                     break;
                 }
             }
@@ -115,7 +173,8 @@ public class MatchManager : MonoBehaviour, IOnEventCallback
 
     public void ListPlayerSend()
     {
-        object[] package = new object[allPlayers.Count];
+        object[] package = new object[allPlayers.Count + 1];
+        package[0] = state;
         for (int i = 0; i < allPlayers.Count; i++)
         {
             object[] piece = new object[4];
@@ -124,7 +183,7 @@ public class MatchManager : MonoBehaviour, IOnEventCallback
             piece[2] = allPlayers[i].kills;
             piece[3] = allPlayers[i].deaths;
 
-            package[i] = piece;
+            package[i + 1] = piece;
         }
 
         PhotonNetwork.RaiseEvent(
@@ -138,16 +197,18 @@ public class MatchManager : MonoBehaviour, IOnEventCallback
     public void ListPlayerReceive(object[] objects)
     {
         allPlayers.Clear();
-        for (int i = 0; i < objects.Length; i++)
+        state = (GameState) objects[0]; 
+        for (int i = 1; i < objects.Length; i++)
         {
             object[] piece = (object[]) objects[i];
             PlayerInfo playerInfo = new PlayerInfo((string) piece[0], (int) piece[1], (int) piece[2], (int) piece[3]);
             allPlayers.Add(playerInfo);
             if (PhotonNetwork.LocalPlayer.ActorNumber == playerInfo.actor)
             {
-                index = i;
+                index = i-1;
             }
         }
+        StateCheck();
     }
 
     public void UpdateStatsSend(int actorSend, int statToUpdate, int amountToChange)
@@ -197,6 +258,7 @@ public class MatchManager : MonoBehaviour, IOnEventCallback
                 break;
             }
         }
+        ScoreCheck();
     }
     
     public void UpdateStatsDisplay()
@@ -253,6 +315,149 @@ public class MatchManager : MonoBehaviour, IOnEventCallback
             sorted.Add(selectedPlayer);
         }
         return sorted;
+    }
+
+    public void OnLeftRoom()
+    {
+        //base.OnLeftRoom();
+        SceneManager.LoadScene(0);
+    }
+
+    void ScoreCheck()
+    {
+        bool winnerFound = false;
+        foreach (PlayerInfo player in allPlayers)
+        {
+            if (player.kills >= killsToWin && killsToWin > 0)
+            {
+                winnerFound = true;
+                break;
+            }
+        }
+
+        if (winnerFound)
+        {
+            if (PhotonNetwork.IsMasterClient && state != GameState.Ending)
+            {
+                state = GameState.Ending;
+                ListPlayerSend();
+            }
+        }
+    }
+
+    void StateCheck()
+    {
+        if (state == GameState.Ending)
+        {
+            EndGame();
+        }
+    }
+
+    void EndGame()
+    {
+        state = GameState.Ending;
+        if (PhotonNetwork.IsMasterClient)
+        {
+            PhotonNetwork.DestroyAll();
+        }
+        UIController.instance.endScreen.SetActive(true);
+        ShowLeaderboard();
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+        Camera.main.transform.position = mapCameraPoint.position;
+        Camera.main.transform.rotation = mapCameraPoint.rotation;
+        StartCoroutine(EndCo());
+    }
+
+    private IEnumerator EndCo()
+    {
+        yield return new WaitForSeconds(waitAfterEnding);
+        if (!perpetualMatch)
+        {
+            PhotonNetwork.AutomaticallySyncScene = false;
+            PhotonNetwork.LeaveRoom();
+        }
+        else
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                if (!Launcher.instance.changeMapBetweenRounds)
+                {
+                    NextMatchSend();
+                }
+                else
+                {
+                    int newLevel = Random.Range(0, Launcher.instance.allMaps.Length);
+                    if (Launcher.instance.allMaps[newLevel] == SceneManager.GetActiveScene().name)
+                    {
+                        NextMatchSend();
+                    }
+                    else
+                    {
+                        PhotonNetwork.LoadLevel(Launcher.instance.allMaps[newLevel]);
+                    }
+                }
+            }
+        }
+    }
+
+    public void NextMatchSend()
+    {
+        PhotonNetwork.RaiseEvent(
+            (byte) EventCodes.NextMatch,
+            null,
+            new RaiseEventOptions {Receivers = ReceiverGroup.All},
+            new SendOptions {Reliability = true}
+        );
+    }
+
+    public void NextMatchReceive()
+    {
+        state = GameState.Playing;
+        UIController.instance.endScreen.SetActive(false);
+        UIController.instance.leaderboard.SetActive(false);
+        foreach (PlayerInfo player in allPlayers)
+        {
+            player.kills = 0;
+            player.deaths = 0;
+        }
+        UpdateStatsDisplay();
+        PlayerSpawner.instance.SpawnPlayer();
+        SetupTimer();
+    }
+
+    public void SetupTimer()
+    {
+        if (matchLength > 0)
+        {
+            currentMatchTime = matchLength;
+            UpdateTimerDisplay();
+        }
+    }
+
+    public void UpdateTimerDisplay()
+    {
+        var timeToDisplay = System.TimeSpan.FromSeconds(currentMatchTime);
+        UIController.instance.timerText.text = $"{timeToDisplay.Minutes.ToString("00")}:{timeToDisplay.Seconds.ToString("00")}";
+    }
+
+    public void TimerSend()
+    {
+        object[] package = new object[] { (int) currentMatchTime, state };
+        PhotonNetwork.RaiseEvent(
+            (byte) EventCodes.TimerSync,
+            package,
+            new RaiseEventOptions {Receivers = ReceiverGroup.All},
+            new SendOptions {Reliability = true}
+        );
+    }
+
+    public void TimerReceive(object[] dataReceived)
+    {
+        currentMatchTime = (int) dataReceived[0];
+        state = (GameState) dataReceived[1];
+        UpdateTimerDisplay();
+        UIController.instance.timerText.gameObject.SetActive(true);
     }
 }
 

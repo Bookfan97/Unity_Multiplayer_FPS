@@ -34,11 +34,12 @@ MonoBehaviour:
   StartInOfflineMode: 0
   RpcList:
   - ClickRpc
+  - DealDamage
   - DestroyRpc
   - DestroySpaceship
   - Fire
   - RespawnSpaceship
-  - DealDamage
+  - SetGun
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

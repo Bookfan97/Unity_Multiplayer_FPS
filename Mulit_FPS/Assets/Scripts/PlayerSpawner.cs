@@ -48,6 +48,9 @@ public class PlayerSpawner : MonoBehaviour
         UIController.instance.deathScreen.SetActive(true);
         yield return new WaitForSeconds(respawnTime);
         UIController.instance.deathScreen.SetActive(false);
-        SpawnPlayer();
+        if (MatchManager.instance.state == MatchManager.GameState.Playing && player == null)
+        {
+            SpawnPlayer();
+        }
     }
 }
