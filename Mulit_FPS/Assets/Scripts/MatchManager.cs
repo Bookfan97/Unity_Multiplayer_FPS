@@ -13,7 +13,8 @@ public class MatchManager : MonoBehaviour, IOnEventCallback
     {
         NewPlayer,
         ListPlayers,
-        UpdateStat
+        UpdateStat,
+        NextMatch
     }
 
     public static MatchManager instance;
@@ -32,6 +33,7 @@ public class MatchManager : MonoBehaviour, IOnEventCallback
     public Transform mapCameraPoint;
     public GameState state = GameState.Waiting;
     public float waitAfterEnding = 5f;
+    public bool perpetualMatch;
     
     private void Awake()
     {
@@ -89,6 +91,11 @@ public class MatchManager : MonoBehaviour, IOnEventCallback
                 case EventCodes.UpdateStat:
                 {
                     UpdateStatsReceive(data);
+                    break;
+                }
+                case EventCodes.NextMatch:
+                {
+                    NextMatchReceive();
                     break;
                 }
             }
@@ -328,8 +335,42 @@ public class MatchManager : MonoBehaviour, IOnEventCallback
     private IEnumerator EndCo()
     {
         yield return new WaitForSeconds(waitAfterEnding);
-        PhotonNetwork.AutomaticallySyncScene = false;
-        PhotonNetwork.LeaveRoom();
+        if (!perpetualMatch)
+        {
+            PhotonNetwork.AutomaticallySyncScene = false;
+            PhotonNetwork.LeaveRoom();
+        }
+        else
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                NextMatchSend();
+            }
+        }
+    }
+
+    public void NextMatchSend()
+    {
+        PhotonNetwork.RaiseEvent(
+            (byte) EventCodes.NextMatch,
+            null,
+            new RaiseEventOptions {Receivers = ReceiverGroup.All},
+            new SendOptions {Reliability = true}
+        );
+    }
+
+    public void NextMatchReceive()
+    {
+        state = GameState.Playing;
+        UIController.instance.endScreen.SetActive(false);
+        UIController.instance.leaderboard.SetActive(false);
+        foreach (PlayerInfo player in allPlayers)
+        {
+            player.kills = 0;
+            player.deaths = 0;
+        }
+        UpdateStatsDisplay();
+        PlayerSpawner.instance.SpawnPlayer();
     }
 }
 
