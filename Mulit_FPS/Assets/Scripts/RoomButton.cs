@@ -1,17 +1,20 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
-using Photon.Realtime;
-using TMPro;
 using UnityEngine;
+using TMPro;
+using Photon.Realtime;
 
 public class RoomButton : MonoBehaviour
 {
     public TMP_Text buttonText;
+
     private RoomInfo info;
 
-    public void SetButtonInfo(RoomInfo inputInfo)
+    
+    public void SetButtonDetails(RoomInfo inputInfo)
     {
         info = inputInfo;
+
         buttonText.text = info.Name;
     }
 
